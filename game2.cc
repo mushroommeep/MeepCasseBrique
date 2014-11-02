@@ -13,34 +13,38 @@ int read_keybord();
 
 /******************************************************************************/
 #define H 20
-#define L 30
+#define L 40
 
 char screen[H][L];
-
-void screen_display() {
-  system("clear");
-  for (int i=0; i<H; i++) {
-    for (int j=0; j<L; j++) {
-      cout << screen[i][j];
+void clear_screen (){
+  system ("clear");
+  for(int i=0;i<H;i++){
+    for (int j=0;j<L;j++)
+      cout << screen [i][j];
+    cout << endl;
     }
+}
+void screen_display() {
+  for (int i=0; i<H; i++) {
+    for (int j=0; j<L; j++) 
+      if (i==0||j==0 || j==L-1 || i==H-1)
+	screen [i][j]='*';
+      else
+	screen[i][j]= ' ';
     cout << endl;
   }
 }
 
-void clear_screen() {
-  for (int i=0; i<H; i++)
-    for (int j=0; j<L; j++)
-      screen[i][j] = ' ';
-}
 
 /******************************************************************************/
-double x = 0.0;
-double y = 0.0;
-
-void update_game(int key) {
-  screen[(int)x][(int)y] = 'X';
-  x = x + 0.2;
-  y = y + 0.05;
+int x=1,y=1,a=1,b=1;
+void update_game(int key){
+  screen[x][y]='o';
+  if(x==H-2)   a=-1;
+  if(x==1)     a=1;
+  if(y==L-2)   b=-1;
+  if(y==1)     b=1;
+  x+=a; y+=b;
 }
 
 /******************************************************************************/
