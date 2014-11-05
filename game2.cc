@@ -10,7 +10,6 @@ using namespace std;
 /* retourne 0 si aucune touche n'est appuyée, 
  * sinon retourne le code ASCII de la touche */
 int read_keybord();
-
 /******************************************************************************/
 #define H 20
 #define L 40
@@ -35,6 +34,30 @@ void screen_display() {
   }
 }
 
+void barre(int key){
+  int bA= L/2-4, bD=L/2+4;
+  for (int i=0;i<H;i++){
+    for (int j =0; j<L;j++)
+      if( i== H-3 && j>bA && j < bD)
+	screen [i][j]='_';
+  }
+  if (key == 'a')
+    { 
+      if ( bA >=1)
+	{
+	  bA-=3;
+	  bD-=3;
+	}
+    }
+  if (key=='d')
+    {
+      if( bD <= L-1)
+	{
+	  bA +=3;
+	  bD+=3;
+	}
+    }
+}
 
 /******************************************************************************/
 int x=1,y=1,a=1,b=1;
@@ -54,11 +77,14 @@ int main() {
   do {
     key = read_keybord();
     clear_screen();
+    screen_display(); 
     update_game(key);
-    screen_display();
-    usleep(20 * 1000);
+    barre(key);
+    usleep(20*10000);
   } while (key != 'q');
 }
+/* Mettre votre code source ici */
+
 
 /******************************************************************************/
 
