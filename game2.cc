@@ -14,10 +14,8 @@ int read_keybord();
 bool a=false,end;
 int count=1,vit = 20*10000,c;
 
-
 // creer le cadre
- 
-void cadre() { 
+ void cadre() { 
   for (int i=0; i<H;++i) {
       for (int j=0; j<L;++j)
 	if (i==0||i==H-1||j==L-1||j==0)
@@ -32,7 +30,6 @@ void cadre() {
 }
 
 // Effacer l'ecran
-
 void Effacer() {
   for (int i=1; i<H-1;++i)
     for (int j=1; j<L-1;++j)
@@ -41,13 +38,11 @@ void Effacer() {
 
 int n=10,longeur=10;
 int key=read_keybord();
-
 int x,y;
 int dx=1,dy;
 bool p;
    
 // Creer la barre
-
 void barre() {
   for(int i=n+1;i<n+longeur;++i)
 	tab[H-2][i]='~';
@@ -72,10 +67,8 @@ void up_jeux(){
     {
       if(y%2==0){
       flag[(x-1)*(L-2)+y]=false;
-      flag[(x-1)*(L-2)+y-1]=false;
-      }
-      else 
-	{
+      flag[(x-1)*(L-2)+y-1]=false;}
+      else {
 	  flag[(x-1)*(L-2)+y]=false;
 	  flag[(x-1)*(L-2)+y+1]=false;}
       dx=-1*dx;
@@ -100,11 +93,7 @@ void balle() {
   veri_brique();
   tab[x][y]='O'; 
   if(x==H-1)  p= true;
-  if((x==H-3) && (y>n) && (y<n+longeur)){
-    dx=-1;
-    if(y==n+1||y==n-1+longeur)
-      y--;
-  }
+  if((x==H-3) && (y>n) && (y<n+longeur)) dx=-1;
   if(y==L-2)  dy=-1;
   if (x==1)   dx=1;
   if (y==1)   dy=1;
@@ -137,13 +126,9 @@ void jouer() {
       }
       usleep(vit);
 	if ((key=='a')&&(n>0))
-	  {
-	    n-=4;
-	  }
-      if ((key=='d') && (n+longeur<L-1))
-	{
+	    n-=4;		
+      	if ((key=='d') && (n+longeur<L-1))
 	    n+=4; 
-	  }
     }
    while((key!='q')&&( !p)&& !end);
    if(p){
