@@ -1,91 +1,245 @@
-/******************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <iostream>
 #include <termios.h>
 #include <fcntl.h>
+#include <time.h>
+#define H 15
+#define L 30
 using namespace std;
-
-/* retourne 0 si aucune touche n'est appuyée, 
- * sinon retourne le code ASCII de la touche */
+char tab[H][L];
+bool flag[100];
 int read_keybord();
-/******************************************************************************/
-#define H 20
-#define L 40
+bool a=false,end;
+int count=1,vit = 20*10000,c;
 
-char screen[H][L];
-void clear_screen (){
-  system ("clear");
-  for(int i=0;i<H;i++){
-    for (int j=0;j<L;j++)
-      cout << screen [i][j];
-    cout << endl;
+
+// creer le cadre
+ 
+void cadre() { 
+  for (int i=0; i<H;++i) {
+      for (int j=0; j<L;++j)
+	if (i==0||i==H-1||j==L-1||j==0)
+	  tab[i][j]='*';
+      cout << endl;
+    }
+  for (int i=0; i<H; ++i){
+      for(int j=0;j<L;++j)
+	cout << tab[i][j];
+      cout<< endl;
     }
 }
-void screen_display() {
-  for (int i=0; i<H; i++) {
-    for (int j=0; j<L; j++) 
-      if (i==0||j==0 || j==L-1 || i==H-1)
-	screen [i][j]='*';
-      else
-	screen[i][j]= ' ';
-    cout << endl;
-  }
+
+// Effacer l'ecran
+
+void Effacer() {
+  for (int i=1; i<H-1;++i)
+    for (int j=1; j<L-1;++j)
+      tab[i][j] = ' '; 
 }
 
-void barre(int key){
-  int bA= L/2-4, bD=L/2+4;
-  for (int i=0;i<H;i++){
-    for (int j =0; j<L;j++)
-      if( i== H-3 && j>bA && j < bD)
-	screen [i][j]='_';
-  }
-  if (key == 'a')
-    { 
-      if ( bA >=1)
-	{
-	  bA-=3;
-	  bD-=3;
-	}
-    }
-  if (key=='d')
+int n=10,longeur=10;
+int key=read_keybord();
+
+int x,y;
+int dx=1,dy;
+bool p;
+   
+// Creer la barre
+
+void barre() {
+  for(int i=n+1;i<n+longeur;++i)
+	tab[H-2][i]='~';
+}
+
+// Creer les briques
+void briqueposition(){
+ for (int i= 1 ; i < 85 ; i++)
+   flag[i]=true;
+}
+void briques() 
+{
+  for (int i= 1 ; i < 4 ; i++)
+    for (int j = 1 ; j < L-1 ; j++)
+      { 
+	if(flag[(i-1)*(L-2)+j]==true)
+	  tab[i][j]='=';
+      }
+}
+void up_jeux(){
+  if(tab[x][y]=='=')
     {
-      if( bD <= L-1)
+      if(y%2==0){
+      flag[(x-1)*(L-2)+y]=false;
+      flag[(x-1)*(L-2)+y-1]=false;
+      }
+      else 
 	{
-	  bA +=3;
-	  bD+=3;
+	  flag[(x-1)*(L-2)+y]=false;
+	  flag[(x-1)*(L-2)+y+1]=false;}
+      dx=-1*dx;
+      count++;
+      if(count == 5){
+	count=0;
+	if( longeur >=5)
+	  longeur--;
+	vit -= 15000;
 	}
     }
 }
-
-/******************************************************************************/
-int x=1,y=1,a=1,b=1;
-void update_game(int key){
-  screen[x][y]='o';
-  if(x==H-2)   a=-1;
-  if(x==1)     a=1;
-  if(y==L-2)   b=-1;
-  if(y==1)     b=1;
-  x+=a; y+=b;
+void veri_brique(){
+   for (int i= 1 ; i < 85 ; i++)
+     if(flag[i]==true){
+       end=false;break;}
+     else end=true;
 }
-
-/******************************************************************************/
-
-int main() {
+void balle() {
+  briques();
+  up_jeux();
+  veri_brique();
+  tab[x][y]='O'; 
+  if(x==H-1)  p= true;
+  if((x==H-3) && (y>n) && (y<n+longeur)){
+    dx=-1;
+    if(y==n+1||y==n-1+longeur)
+      y--;
+  }
+  if(y==L-2)  dy=-1;
+  if (x==1)   dx=1;
+  if (y==1)   dy=1;
+  if(a) 
+    {
+      x+=dx;
+      y+=dy;}
+}
+ 
+void jouer() {
   int key;
-  do {
-    key = read_keybord();
-    clear_screen();
-    screen_display(); 
-    update_game(key);
-    barre(key);
-    usleep(20*10000);
-  } while (key != 'q');
+  time_t seconds;
+  time(&seconds);
+  srand((unsigned int)seconds);
+  x=rand()%(H-8)+4;
+  y=rand()%(L-2)+1;
+  dy=rand()%2;
+  if(dy==0)dy=-1;
+  briqueposition();
+  do
+    { 
+      key=read_keybord();
+      Effacer();
+      balle();
+      barre();
+      cadre();
+      while (!a){
+	key=read_keybord();
+      	if(key=='c') a=true;
+      }
+      usleep(vit);
+	if ((key=='a')&&(n>0))
+	  {
+	    n-=4;
+	  }
+      if ((key=='d') && (n+longeur<L-1))
+	{
+	    n+=4; 
+	  }
+    }
+   while((key!='q')&&( !p)&& !end);
+   if(p){
+     for (int i= 1 ; i < 85 ; i++)
+       if(flag[i]==false)
+	  c++;
+     if (c >80)
+       cout <<"   VOUS AVEZ PERDU MAIS AVEC UNE CLASS!! "<<endl
+	    << "****************************************"<<endl
+            << "*               DIAMANT                *"<<endl
+            << "*                                      *"<<endl
+            << "*               *******                *"<<endl
+            << "*              *********               *"<<endl
+            << "*                *****                 *"<<endl
+	    << "*                  *                   *"<<endl
+	    << "****************************************"<<endl;
+ 
+     else if (c >70)
+       cout <<"   VOUS AVEZ PERDU MAIS AVEC UNE CLASS!! "<<endl
+	    << "****************************************"<<endl
+            << "*                 OR                   *"<<endl
+            << "*                                      *"<<endl
+            << "*               *******                *"<<endl
+            << "*              *  gold *               *"<<endl
+            << "*               *     *                 *"<<endl
+	    << "*                  *                   *"<<endl
+	    << "****************************************"<<endl;
+     else if (c >60)
+       cout <<"   VOUS AVEZ PERDU MAIS AVEC UNE CLASS!! "<<endl
+	    << "****************************************"<<endl
+            << "*               ARGENT                 *"<<endl
+            << "*                                      *"<<endl
+            << "*               *******                *"<<endl
+            << "*              * argent *              *"<<endl
+            << "*               *     *                *"<<endl
+	    << "*                  *                   *"<<endl
+	    << "****************************************"<<endl;
+     else if (c >30)
+	cout <<"   VOUS AVEZ PERDU MAIS AVEC UNE CLASS!! "<<endl
+	     << "****************************************"<<endl
+	     << "*               CUIVRE                 *"<<endl
+	     << "*                                      *"<<endl
+	     << "*               *******                *"<<endl
+	     << "*              * cuivre*               *"<<endl
+	     << "*               *     *                *"<<endl
+	     << "*                  *                   *"<<endl
+	     << "****************************************"<<endl;
+     else{
+      cout<<" ``````````````````````````````````````````````"<<endl;
+      cout<<" *************Vous avez perdu!!! :3************"<<endl;
+      cout<<" .............................................."<<endl;}
+   }
+   if(end){
+     cout<<" ``````````````````````````````````````````````"<<endl;
+     cout<<" *************** VOUS GAGNEZ!!! :3*************"<<endl;
+     cout<<" .............................................."<<endl;}
 }
-/* Mettre votre code source ici */
+ void lire(){
+   cout <<endl<<endl<<endl<<endl;
+   cout << " *********************************************************"<<"\n"     
+        << " *                 CASSE BRIQUE                          *"<<endl;
+   cout << " *                Instructions:                          *"<<endl;
+   cout << " * 1. appuyez sur 'c' pour jouer                         *"<<endl
+        << " * 2. controllez la barre:                               *"<<endl
+        << " *    +a gauche:appuyez sur 'a'                          *"<<endl
+        << " *    +a droite:appuyez sur 'd'                          *" << endl
+	<< " * 3. la balle touche une brique, la brique sera effacee.*" << endl
+        << " *   Quand il n'y a plus de briques, vous gagnerez.      *" << endl;
+   cout << " * Si vous ne pouvez pas saisir la balle,vous serez perdu*"<< endl;
+   cout << " *                 BONNE CHANCE!!!                       *"<<endl;
+   cout << " *********************************************************"<<endl;
+   cout <<endl<<endl<<endl<<endl;
+ }
+  
 
-
+ int main(){
+   int choix;
+ do{
+	cout << "\n\t --- CASSE BRIQUE --- \n";
+	cout<<" 1. lire les instructions. \n";
+	cout<<" 2. jouer. \n";
+	cout<<" 3. quitter.\n";
+	cout<<" Votre choix <numero>: ";
+	cin>>choix;
+	switch(choix){
+	case 1: lire(); 
+			break;
+	case 2: jouer();
+			break;
+	case 3: cout<<" A bientot!!!";
+			break;
+	default: cout<<"<choix invalid> un autre choix, s'il vous plait!";
+	}
+	
+ }while((choix!=3)&&(choix!=2));
+ }
 /******************************************************************************/
 
 int kbhit(void)
@@ -124,5 +278,4 @@ int read_keybord() {
   return key;
 }
 
-/******************************************************************************/
 /******************************************************************************/
